@@ -1,0 +1,16 @@
+import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1360, height: 900 } });
+const errs = [];
+p.on('pageerror', e => errs.push('PAGEERR ' + e.message));
+p.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text()); });
+await p.addInitScript(() => { try { sessionStorage.setItem('bacha.session', 'u_v3'); } catch {} });
+await p.goto('http://localhost:8765/index.html');
+await p.waitForTimeout(1500);
+console.log('URL', p.url());
+await p.evaluate(() => { location.hash = '#/vendor'; });
+await p.waitForTimeout(1500);
+console.log('URL2', p.url());
+await p.screenshot({ path: '/home/claude/bacha/s1.png', fullPage: false });
+console.log(errs.join('\n'));
+await b.close();
